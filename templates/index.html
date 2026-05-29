@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBA Playoffs Prediction Market</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0b1121;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a2332 0%, #0f1a2e 100%);
+      border-bottom: 1px solid #1e3a5f;
+      padding: 24px 32px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #f97316, #eab308, #f97316);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+    .header p { color: #94a3b8; font-size: 14px; margin-top: 4px; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 24px 32px; }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: #151f31;
+      border: 1px solid #1e3a5f;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-card .value { font-size: 28px; font-weight: 700; color: #fbbf24; }
+    .stat-card .label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .badge {
+      background: #1d4ed8;
+      color: white;
+      font-size: 12px;
+      padding: 2px 10px;
+      border-radius: 999px;
+    }
+    .markets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .market-card {
+      background: #151f31;
+      border: 1px solid #1e3a5f;
+      border-radius: 14px;
+      padding: 20px;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .market-card:hover { transform: translateY(-2px); border-color: #f97316; }
+    .market-title { font-weight: 600; font-size: 15px; margin-bottom: 14px; color: #f1f5f9; }
+    .matchup { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .team {
+      flex: 1;
+      text-align: center;
+      padding: 10px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .team-a { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); }
+    .team-b { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); }
+    .vs { color: #475569; font-weight: 700; font-size: 13px; }
+    .odds-bar {
+      display: flex;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      background: #1e293b;
+    }
+    .odds-bar-a { background: #3b82f6; transition: width 0.3s; }
+    .odds-bar-b { background: #ef4444; transition: width 0.3s; }
+    .odds-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .odds-a { color: #93c5fd; }
+    .odds-b { color: #fca5a5; }
+    .market-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #64748b;
+      border-top: 1px solid #1e293b;
+      padding-top: 12px;
+    }
+    .market-footer span { display: flex; align-items: center; gap: 4px; }
+    .leaderboard-section { margin-bottom: 48px; }
+    .leaderboard-table {
+      width: 100%;
+      background: #151f31;
+      border: 1px solid #1e3a5f;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .leaderboard-table th {
+      background: #0f172a;
+      padding: 12px 16px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      text-align: left;
+    }
+    .leaderboard-table td {
+      padding: 12px 16px;
+      border-top: 1px solid #1e293b;
+      font-size: 14px;
+    }
+    .leaderboard-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .rank { color: #64748b; font-weight: 600; width: 40px; }
+    .rank-1 { color: #fbbf24; }
+    .rank-2 { color: #94a3b8; }
+    .rank-3 { color: #d97706; }
+    .username { font-weight: 600; color: #e2e8f0; }
+    .points { color: #fbbf24; font-weight: 700; }
+    .footer {
+      text-align: center;
+      padding: 24px;
+      color: #475569;
+      font-size: 13px;
+      border-top: 1px solid #1e293b;
+    }
+    .footer a { color: #f97316; text-decoration: none; }
+    .status-badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #065f46;
+      color: #6ee7b7;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>NBA Playoffs Prediction Market</h1>
+    <p>Decentralized playoff series predictions on Polygon &bull; $1,000 Prize Pool</p>
+  </div>
+
+  <div class="container">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="value">{{ total_markets }}</div>
+        <div class="label">Markets</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">${{ "{:,.0f}".format(total_volume) }}</div>
+        <div class="label">Total Volume</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">{{ total_predictions }}</div>
+        <div class="label">Predictions</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">{{ leaderboard|length }}</div>
+        <div class="label">Top Predictors</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      Playoff Series Markets
+      <span class="badge">{{ markets|length }} active</span>
+    </div>
+
+    <div class="markets-grid">
+      {% for m in markets %}
+      <div class="market-card">
+        <div class="market-title">{{ m.title }}</div>
+        <div class="matchup">
+          <div class="team team-a">{{ m.team_a }}</div>
+          <div class="vs">VS</div>
+          <div class="team team-b">{{ m.team_b }}</div>
+        </div>
+        <div class="odds-bar">
+          <div class="odds-bar-a" style="width: {{ m.odds_a }}%"></div>
+          <div class="odds-bar-b" style="width: {{ m.odds_b }}%"></div>
+        </div>
+        <div class="odds-labels">
+          <span class="odds-a">{{ m.team_a }}: {{ m.odds_a }}%</span>
+          <span class="odds-b">{{ m.team_b }}: {{ m.odds_b }}%</span>
+        </div>
+        <div class="market-footer">
+          <span>Volume: ${{ "{:,.0f}".format(m.volume) }}</span>
+          <span>{{ m.prediction_count }} predictions</span>
+          <span class="status-badge">{{ m.status }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="leaderboard-section">
+      <div class="section-title">Leaderboard</div>
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Predictor</th>
+            <th>Points</th>
+            <th>Predictions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in leaderboard %}
+          <tr>
+            <td class="rank {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">{{ loop.index }}</td>
+            <td class="username">{{ u.username }}</td>
+            <td class="points">{{ "{:,.1f}".format(u.points) }}</td>
+            <td>{{ u.predictions_count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    Built for the
+    <a href="https://dorahacks.io/hackathon/nba-prediction-market" target="_blank">NBA Playoffs Prediction Market Hackathon</a>
+    &bull; Polygon Ecosystem &bull; Deadline June 1, 2026
+  </div>
+</body>
+</html>
