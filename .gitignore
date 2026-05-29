@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.db
+nohup.out
+.env
+venv/
